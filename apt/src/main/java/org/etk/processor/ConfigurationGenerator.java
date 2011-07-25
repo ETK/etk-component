@@ -60,8 +60,7 @@ public class ConfigurationGenerator extends AbstractProcessor
             FileObject configFile = filer.createResource(StandardLocation.SOURCE_PATH, CONFIG_DIR, CONFIG_FILE);
             writer = configFile.openWriter();
 
-            generateConfig(processingEnv, writer);
-            writer.flush();
+            generateConfig(processingEnv, roundEnv, writer);
          }
          catch(Exception ex)
          {
@@ -85,13 +84,13 @@ public class ConfigurationGenerator extends AbstractProcessor
       return true;
    }
 
-   public void generateConfig(ProcessingEnvironment processEnv, Writer writer)
+   public void generateConfig(ProcessingEnvironment processEnv, RoundEnvironment roundEnv, Writer writer)
    {
       Iterator<ConfigurationBuilder> iterator = ServiceLoader.load(ConfigurationBuilder.class).iterator();
       if(iterator.hasNext())
       {
          try{
-            iterator.next().build(processEnv, writer);
+            iterator.next().build(processEnv, roundEnv, writer);
          }
          catch (IOException ioEx)
          {

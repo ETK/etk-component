@@ -16,20 +16,16 @@
  * Software Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA
  * 02110-1301 USA, or see the FSF site: http://www.fsf.org.
  */
-package org.etk.processor;
-
-import java.io.IOException;
-import java.io.Writer;
-import javax.annotation.processing.ProcessingEnvironment;
-import javax.annotation.processing.RoundEnvironment;
+package org.etk.processor.annotation;
 
 /**
- * TODO: Move this interface to a seperated Maven artifact
- *
  * @author <a href="hoang281283@gmail.com">Minh Hoang TO</a>
- * @date 7/22/11
+ * @date 7/25/11
  */
-public interface ConfigurationBuilder
+public @interface KernelComponent
 {
-   public void build(ProcessingEnvironment processEnv, RoundEnvironment roundEnv, Writer writer) throws IOException;
+   String key();
+
+   String jmxName();
+
 }
