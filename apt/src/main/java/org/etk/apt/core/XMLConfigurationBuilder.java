@@ -16,9 +16,10 @@
  * Software Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA
  * 02110-1301 USA, or see the FSF site: http://www.fsf.org.
  */
-package org.etk.processor;
+package org.etk.apt.core;
 
-import org.etk.processor.annotation.KernelComponent;
+import org.etk.apt.annotation.KernelComponent;
+import org.etk.apt.api.ConfigurationBuilder;
 import java.io.BufferedWriter;
 import java.io.IOException;
 import java.io.Writer;

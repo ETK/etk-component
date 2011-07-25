@@ -14,5 +14,12 @@
   <name>Engineering toolkit Framework APT</name>
   <description>Engineering toolkit Framework Annotation Processing</description>
 
+  <dependencies>
+    <dependency>
+      <groupId>junit</groupId>
+      <artifactId>junit</artifactId>
+    </dependency>
+  </dependencies>
+
 </project>
 
