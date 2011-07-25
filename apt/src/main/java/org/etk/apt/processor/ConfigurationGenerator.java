@@ -28,6 +28,9 @@ import javax.annotation.processing.AbstractProcessor;
 import javax.annotation.processing.Filer;
 import javax.annotation.processing.ProcessingEnvironment;
 import javax.annotation.processing.RoundEnvironment;
+import javax.annotation.processing.SupportedAnnotationTypes;
+import javax.annotation.processing.SupportedSourceVersion;
+import javax.lang.model.SourceVersion;
 import javax.lang.model.element.TypeElement;
 import javax.tools.FileObject;
 import javax.tools.StandardLocation;
@@ -36,6 +39,8 @@ import javax.tools.StandardLocation;
  * @author <a href="hoang281283@gmail.com">Minh Hoang TO</a>
  * @date 7/22/11
  */
+@SupportedSourceVersion(SourceVersion.RELEASE_6)
+@SupportedAnnotationTypes("*")
 public class ConfigurationGenerator extends AbstractProcessor
 {
 

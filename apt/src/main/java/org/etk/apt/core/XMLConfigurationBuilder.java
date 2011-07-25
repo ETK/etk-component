@@ -72,14 +72,14 @@ public class XMLConfigurationBuilder implements ConfigurationBuilder
       key = kerAnnotation.key();
       type = kernelElement.asType().toString();
       jmxName = kerAnnotation.jmxName();
-      if(key == null)
+      if(key == null || key.length() < 1)
       {
          key = type;
       }
 
       builder.append("<key>").append(key).append("</key>\n");
       builder.append("<type>").append(type).append("</type>\n");
-      if(jmxName != null)
+      if(jmxName != null && jmxName.length() > 0)
       {
          builder.append("<jmx-name>").append(jmxName).append("</jmx-name>\n");
       }

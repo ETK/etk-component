@@ -24,8 +24,8 @@ package org.etk.apt.annotation;
  */
 public @interface KernelComponent
 {
-   String key();
+   String key() default "";
 
-   String jmxName();
+   String jmxName() default "";
 
 }
