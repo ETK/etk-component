@@ -18,10 +18,17 @@
  */
 package org.etk.apt.annotation;
 
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
+
 /**
  * @author <a href="hoang281283@gmail.com">Minh Hoang TO</a>
  * @date 7/25/11
  */
+@Target(ElementType.TYPE)
+@Retention(RetentionPolicy.SOURCE)
 public @interface KernelComponent
 {
    String key() default "";
