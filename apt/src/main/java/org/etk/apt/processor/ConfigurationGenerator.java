@@ -39,7 +39,7 @@ import javax.tools.StandardLocation;
  * @author <a href="hoang281283@gmail.com">Minh Hoang TO</a>
  * @date 7/22/11
  */
-@SupportedSourceVersion(SourceVersion.RELEASE_6)
+@SupportedSourceVersion(SourceVersion.RELEASE_5)
 @SupportedAnnotationTypes("*")
 public class ConfigurationGenerator extends AbstractProcessor
 {
@@ -63,13 +63,14 @@ public class ConfigurationGenerator extends AbstractProcessor
          try
          {
             Filer filer = processingEnv.getFiler();
-            FileObject configFile = filer.createResource(StandardLocation.SOURCE_PATH, CONFIG_DIR, CONFIG_FILE);
+            FileObject configFile = filer.createResource(StandardLocation.SOURCE_OUTPUT, CONFIG_DIR, CONFIG_FILE);
             writer = configFile.openWriter();
 
             generateConfig(processingEnv, roundEnv, writer);
          }
          catch(Exception ex)
          {
+            ex.printStackTrace();
             //Do something
          }
          finally
