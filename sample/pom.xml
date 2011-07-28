@@ -15,6 +15,7 @@
   <description>Engineering toolkit Framework Sample</description>
 
   <modules>
+    <module>apt</module>
     <module>model</module>
   </modules>
 </project>
