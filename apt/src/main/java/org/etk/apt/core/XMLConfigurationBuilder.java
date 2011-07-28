@@ -38,6 +38,7 @@ public class XMLConfigurationBuilder implements ConfigurationBuilder
    {
       BufferedWriter buf = new BufferedWriter(writer);
       buildHeader(buf);
+      buildBody(processEnv, roundEnv, writer);
       buildFooter(buf);
       buf.flush();
    }
@@ -45,6 +46,7 @@ public class XMLConfigurationBuilder implements ConfigurationBuilder
    private void buildHeader(Writer writer) throws IOException
    {
       writer.write("<configuration>\n");
+      writer.flush();
    }
 
    private void buildBody(ProcessingEnvironment processEnv, RoundEnvironment roundEnv, Writer writer) throws IOException
@@ -58,7 +60,7 @@ public class XMLConfigurationBuilder implements ConfigurationBuilder
          }
          catch (IOException ioEx)
          {
-
+             ioEx.printStackTrace();
          }
       }
    }
@@ -88,10 +90,12 @@ public class XMLConfigurationBuilder implements ConfigurationBuilder
       builder.append("\n").append("\n");
 
       writer.write(builder.toString());
+      writer.flush();
    }
 
    private void buildFooter(Writer writer) throws IOException
    {
       writer.append("</configuration>");
+      writer.flush();
    }
 }

@@ -19,6 +19,7 @@
 package org.etk.apt.processor;
 
 import org.etk.apt.api.ConfigurationBuilder;
+import org.etk.apt.core.XMLConfigurationBuilder;
 import java.io.IOException;
 import java.io.Writer;
 import java.util.Iterator;
@@ -93,6 +94,17 @@ public class ConfigurationGenerator extends AbstractProcessor
 
    public void generateConfig(ProcessingEnvironment processEnv, RoundEnvironment roundEnv, Writer writer)
    {
+      ConfigurationBuilder builder = new XMLConfigurationBuilder();
+      try{
+         builder.build(processEnv, roundEnv, writer);
+      }
+      catch (IOException ioEx)
+      {
+         ioEx.printStackTrace();
+      }
+
+      //TODO: Move the ConfigurationBuilder to a dependency so that the ServiceLoader could work
+      /*
       Iterator<ConfigurationBuilder> iterator = ServiceLoader.load(ConfigurationBuilder.class).iterator();
       if(iterator.hasNext())
       {
@@ -104,5 +116,6 @@ public class ConfigurationGenerator extends AbstractProcessor
 
          }
       }
+      */
    }
 }
