@@ -15,11 +15,21 @@
       <dependency>
         <groupId>org.etk.tools</groupId>
         <artifactId>org.etk.tools.junit</artifactId>
-        <version>${org.etk.junit.version}</version>
+        <version>${org.etk.tools.version}</version>
       </dependency>
       <dependency>
         <groupId>org.etk.kernel</groupId>
         <artifactId>org.etk.kernel.container</artifactId>
+        <version>${org.etk.kernel.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.etk.kernel</groupId>
+        <artifactId>org.etk.kernel.cache</artifactId>
+        <version>${org.etk.kernel.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.etk.kernel</groupId>
+        <artifactId>org.etk.kernel.test</artifactId>
         <version>${org.etk.kernel.version}</version>
       </dependency>
   </dependencies>

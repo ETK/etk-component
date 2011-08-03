@@ -14,20 +14,25 @@ import java.util.concurrent.PriorityBlockingQueue;
 
 import javax.servlet.ServletContext;
 
+import org.etk.common.logging.Logger;
 import org.etk.kernel.container.configuration.ConfigurationManager;
 import org.etk.kernel.container.configuration.ConfigurationManagerImpl;
 import org.etk.kernel.container.configuration.MockConfigurationManagerImpl;
-import org.etk.kernel.container.definition.PortalContainerConfig;
+import org.etk.kernel.container.definition.ApplicationContainerConfig;
 import org.etk.kernel.container.definition.PortalContainerDefinition;
+import org.etk.kernel.container.mock.servlet.MockServletContext;
 import org.etk.kernel.container.monitor.jvm.J2EEServerInfo;
 import org.etk.kernel.container.monitor.jvm.OperatingSystemInfo;
 import org.etk.kernel.container.util.ContainerUtil;
 import org.etk.kernel.container.xml.Configuration;
 import org.etk.kernel.management.annotations.Managed;
 import org.etk.kernel.management.annotations.ManagedDescription;
-import org.etk.test.mocks.servlet.MockServletContext;
+import org.etk.kernel.management.jmx.annotations.NamingContext;
+import org.etk.kernel.management.jmx.annotations.Property;
 
 
+@Managed
+@NamingContext(@Property(key = "container", value = "root"))
 public class RootContainer extends KernelContainer {
 
 	/**
@@ -43,9 +48,9 @@ public class RootContainer extends KernelContainer {
 
 	private OperatingSystemInfo osenv_;
 
-	private PortalContainerConfig config_;
+	private ApplicationContainerConfig config_;
 
-	//private static final Log log = ExoLogger.getLogger("exo.kernel.container.RootContainer");
+	private static final Logger log = Logger.getLogger(RootContainer.class);
 
 	private static volatile boolean booting = false;
 
@@ -78,7 +83,7 @@ public class RootContainer extends KernelContainer {
 		profiles.addAll(KernelContainer.getProfiles());
 
 		// Log the active profiles
-		//log.info("Active profiles " + profiles);
+		log.info("Active profiles " + profiles);
 
 		//
 		Runtime.getRuntime().addShutdownHook(new ShutdownThread(this));
@@ -94,19 +99,19 @@ public class RootContainer extends KernelContainer {
 	}
 
 	/**
-	 * @return the {@link PortalContainerConfig} corresponding to the
+	 * @return the {@link ApplicationContainerConfig} corresponding to the
 	 *         {@link RootContainer}
 	 */
-	PortalContainerConfig getPortalContainerConfig() {
+	ApplicationContainerConfig getPortalContainerConfig() {
 		if (config_ == null) {
-			config_ = (PortalContainerConfig) this.getComponentInstanceOfType(PortalContainerConfig.class);
+			config_ = (ApplicationContainerConfig) this.getComponentInstanceOfType(ApplicationContainerConfig.class);
 		}
 		return config_;
 	}
 
 	/**
 	 * Indicates if the current instance is aware of the
-	 * {@link PortalContainerConfig}
+	 * {@link ApplicationContainerConfig}
 	 * 
 	 * @return <code>true</code> if we are using the old way to configure the
 	 *         portal containers, <code>false</code> otherwise
@@ -129,8 +134,8 @@ public class RootContainer extends KernelContainer {
 					pcontainer = new ApplicationContainer(this, scontext);
 					ApplicationContainer.setInstance(pcontainer);
 					ConfigurationManagerImpl cService = new MockConfigurationManagerImpl(scontext);
-					cService.addConfiguration(ContainerUtil.getConfigurationURL("conf/portal/configuration.xml"));
-					cService.addConfiguration(ContainerUtil.getConfigurationURL("conf/portal/test-configuration.xml"));
+					cService.addConfiguration(ContainerUtil.getConfigurationURL("conf/root-configuration.xml"));
+					cService.addConfiguration(ContainerUtil.getConfigurationURL("conf/application/application-configuration.xml"));
 					cService.processRemoveConfiguration();
 					pcontainer.registerComponentInstance(ConfigurationManager.class, cService);
 					registerComponentInstance(name, pcontainer);
@@ -153,7 +158,7 @@ public class RootContainer extends KernelContainer {
 	 *            the context of the portal container
 	 */
 	public void registerPortalContainer(ServletContext context) {
-		PortalContainerConfig config = getPortalContainerConfig();
+		ApplicationContainerConfig config = getPortalContainerConfig();
 		// Ensure that the portal container has been registered
 		config.registerPortalContainerName(context.getServletContextName());
 		if (config.hasDefinition()) {
@@ -182,15 +187,13 @@ public class RootContainer extends KernelContainer {
 	 */
 	public synchronized void createPortalContainers() {
 		// Keep the old ClassLoader
-		final ClassLoader currentClassLoader = Thread.currentThread()
-				.getContextClassLoader();
+		final ClassLoader currentClassLoader = Thread.currentThread().getContextClassLoader();
 		WebAppInitContext context;
 		boolean hasChanged = false;
 		try {
 			while ((context = portalContexts.poll()) != null) {
 				// Set the context classloader of the related web application
-				Thread.currentThread().setContextClassLoader(
-						context.getWebappClassLoader());
+				Thread.currentThread().setContextClassLoader(context.getWebappClassLoader());
 				hasChanged = true;
 				createPortalContainer(context.getServletContext());
 			}
@@ -200,15 +203,15 @@ public class RootContainer extends KernelContainer {
 				Thread.currentThread().setContextClassLoader(currentClassLoader);
 			}
 		}
-		PortalContainerConfig config = getPortalContainerConfig();
+		ApplicationContainerConfig config = getPortalContainerConfig();
 		for (String portalContainerName : initTasks.keySet()) {
 			// Unregister name of portal container that doesn't exist
-			/*
+			
 			log.warn("The portal container '"
 					+ portalContainerName
 					+ "' doesn't not exist or"
 					+ " it has not yet been registered, please check your PortalContainerDefinitions and "
-					+ "the loading order.");*/
+					+ "the loading order.");
 			config.unregisterPortalContainerName(portalContainerName);
 		}
 		// remove all the unneeded tasks
@@ -225,7 +228,7 @@ public class RootContainer extends KernelContainer {
 		boolean hasChanged = false;
 		final String portalContainerName = context.getServletContextName();
 		try {
-			//log.info("Trying to create the portal container '" + portalContainerName + "'");
+			log.info("Trying to create the portal container '" + portalContainerName + "'");
 			ApplicationContainer pcontainer = new ApplicationContainer(this, context);
 			ApplicationContainer.setInstance(pcontainer);
 			executeInitTasks(pcontainer, PortalContainerPreInitTask.TYPE);
@@ -236,17 +239,17 @@ public class RootContainer extends KernelContainer {
 
 			// add configs from services
 			try {
-				cService.addConfiguration(ContainerUtil.getConfigurationURL("conf/portal/configuration.xml"));
+				cService.addConfiguration(ContainerUtil.getConfigurationURL("conf/application/application-configuration.xml"));
 			} catch (Exception ex) {
-				//log.error("Cannot add configuration conf/portal/configuration.xml. ServletContext: " + context, ex);
+				log.error("Cannot add configuration conf/application/configuration.xml. ServletContext: " + context, ex);
 			}
 
 			// Add configuration that depends on the environment
 			String uri;
 			if (serverenv_.isJBoss()) {
-				uri = "conf/portal/jboss-configuration.xml";
+				uri = "conf/application/jboss-configuration.xml";
 			} else {
-				uri = "conf/portal/generic-configuration.xml";
+				uri = "conf/application/generic-configuration.xml";
 			}
 			Collection envConf = ContainerUtil.getConfigurationURL(uri);
 			try {
@@ -262,7 +265,7 @@ public class RootContainer extends KernelContainer {
 				try {
 					cService.addConfiguration(ctx, "war:/conf/configuration.xml");
 				} catch (Exception ex) {
-					//log.error("Cannot add configuration war:/conf/configuration.xml. ServletContext: " + ctx, ex);
+					log.error("Cannot add configuration war:/conf/configuration.xml. ServletContext: " + ctx, ex);
 				}
 			}
 
@@ -291,22 +294,19 @@ public class RootContainer extends KernelContainer {
 			//
 			executeInitTasks(pcontainer, PortalContainerPostInitTask.TYPE);
 			executeInitTasks(pcontainer, PortalContainerPostCreateTask.TYPE);
-			//log.info("The portal container '" + portalContainerName + "' has been created successfully");
+			log.info("The portal container '" + portalContainerName + "' has been created successfully");
 		} catch (Exception ex) {
-			/*
-			log.error("Cannot create the portal container '"
-					+ portalContainerName + "' . ServletContext: " + context,
-					ex); */
+			
+			log.error("Cannot create the portal container '" + portalContainerName + "' . ServletContext: " + context, ex); 
 		} finally {
 			if (hasChanged) {
 				// Re-set the old classloader
-				Thread.currentThread()
-						.setContextClassLoader(currentClassLoader);
+				Thread.currentThread().setContextClassLoader(currentClassLoader);
 			}
 			try {
 				ApplicationContainer.setInstance(null);
 			} catch (Exception e) {
-				//log.warn("An error occured while cleaning the ThreadLocal", e);
+				log.warn("An error occured while cleaning the ThreadLocal", e);
 			}
 		}
 	}
@@ -331,8 +331,8 @@ public class RootContainer extends KernelContainer {
 			RootContainer rootContainer = new RootContainer();
 			ConfigurationManagerImpl service = new ConfigurationManagerImpl(rootContainer.profiles);
 			service.addConfiguration(ContainerUtil.getConfigurationURL("conf/configuration.xml"));
-			if (System.getProperty("maven.exoplatform.dir") != null) {
-				service.addConfiguration(ContainerUtil.getConfigurationURL("conf/test-configuration.xml"));
+			if (System.getProperty("maven.etk.dir") != null) {
+				service.addConfiguration(ContainerUtil.getConfigurationURL("conf/root-configuration.xml"));
 			}
 			String confDir = rootContainer.getServerEnvironment().getExoConfigurationDirectory();
 			String overrideConf = confDir + "/configuration.xml";
@@ -345,7 +345,7 @@ public class RootContainer extends KernelContainer {
 			rootContainer.start(true);
 			return rootContainer;
 		} catch (Exception e) {
-			//log.error("Could not build root container", e);
+			log.error("Could not build root container", e);
 			return null;
 		}
 	}
@@ -373,12 +373,12 @@ public class RootContainer extends KernelContainer {
 							result = buildRootContainer();
 							if (result != null) {
 								time += System.currentTimeMillis();
-								//log.info("Root container is built (build time "	+ time + "ms)");
+								log.info("Root container is built (build time "	+ time + "ms)");
 								KernelContainerContext.setTopContainer(result);
 								singleton_ = result;
-								//log.info("Root container booted");
+								log.info("Root container booted");
 							} else {
-								//log.error("Failed to boot root container");
+								log.error("Failed to boot root container");
 							}
 						} finally {
 							booting = false;
@@ -399,7 +399,7 @@ public class RootContainer extends KernelContainer {
 	public String getConfigurationXML() {
 		Configuration config = getConfiguration();
 		if (config == null) {
-			//log.warn("The configuration of the RootContainer could not be found");
+			log.warn("The configuration of the RootContainer could not be found");
 			return null;
 		}
 		return config.toXML();
@@ -429,22 +429,20 @@ public class RootContainer extends KernelContainer {
 	 *            the servlet context from which the task comes from
 	 * @param task
 	 *            the task to add
-	 * @param portalContainer
+	 * @param appContainer
 	 *            the name of the portal container on which the task must be
 	 *            executed
 	 */
-	public void addInitTask(ServletContext context, PortalContainerInitTask task, String portalContainer) {
-		final ApplicationContainer container = getPortalContainer(portalContainer);
+	public void addInitTask(ServletContext context, PortalContainerInitTask task, String appContainer) {
+		final ApplicationContainer container = getPortalContainer(appContainer);
 		if (!task.alreadyExists(container)) {
-			/*
+			
 			if (log.isDebugEnabled())
-				log.debug("The portal container '"
-						+ portalContainer
-						+ "' has not yet been initialized, thus the task can be added");*/
-			ConcurrentMap<String, Queue<PortalContainerInitTaskContext>> queues = initTasks.get(portalContainer);
+				log.debug("The application container '" + appContainer + "' has not yet been initialized, thus the task can be added");
+			ConcurrentMap<String, Queue<PortalContainerInitTaskContext>> queues = initTasks.get(appContainer);
 			if (queues == null) {
 				queues = new ConcurrentHashMap<String, Queue<PortalContainerInitTaskContext>>();
-				final ConcurrentMap<String, Queue<PortalContainerInitTaskContext>> q = initTasks.putIfAbsent(portalContainer, queues);
+				final ConcurrentMap<String, Queue<PortalContainerInitTaskContext>> q = initTasks.putIfAbsent(appContainer, queues);
 				if (q != null) {
 					queues = q;
 				}
@@ -452,7 +450,7 @@ public class RootContainer extends KernelContainer {
 			final String type = task.getType();
 			Queue<PortalContainerInitTaskContext> queue = queues.get(type);
 			if (queue == null) {
-				final List<String> dependencies = getPortalContainerConfig().getDependencies(portalContainer);
+				final List<String> dependencies = getPortalContainerConfig().getDependencies(appContainer);
 				if (dependencies == null || dependencies.isEmpty()) {
 					// No order is required
 					queue = new ConcurrentLinkedQueue<PortalContainerInitTaskContext>();
@@ -467,11 +465,9 @@ public class RootContainer extends KernelContainer {
 			}
 			queue.add(new PortalContainerInitTaskContext(context, task));
 		} else {
-			/*
+			
 			if (log.isDebugEnabled())
-				log.debug("The portal container '"
-						+ portalContainer
-						+ "' has already been initialized, thus we call onAlreadyExists");*/
+				log.debug("The portal container '" + appContainer + "' has already been initialized, thus we call onAlreadyExists");
 			ApplicationContainer oldPortalContainer = ApplicationContainer.getInstanceIfPresent();
 			try {
 				ApplicationContainer.setInstance(container);
@@ -501,11 +497,9 @@ public class RootContainer extends KernelContainer {
 		if (queue == null) {
 			return;
 		}
-		/*
+		
 		if (log.isDebugEnabled())
-			log.debug("Start launching the " + type
-					+ " tasks of the portal container '" + portalContainer
-					+ "'");*/
+			log.debug("Start launching the " + type + " tasks of the portal container '" + portalContainer + "'");
 		// Keep the old ClassLoader
 		final ClassLoader currentClassLoader = Thread.currentThread().getContextClassLoader();
 		PortalContainerInitTaskContext context;
@@ -527,11 +521,9 @@ public class RootContainer extends KernelContainer {
 		if (queues.isEmpty()) {
 			initTasks.remove(portalContainerName);
 		}
-		/*
+		
 		if (log.isDebugEnabled())
-			log.debug("End launching the " + type
-					+ " tasks of the portal container '" + portalContainer
-					+ "'");*/
+			log.debug("End launching the " + type + " tasks of the portal container '" + portalContainer + "'");
 	}
 
 	static class ShutdownThread extends Thread {
@@ -742,7 +734,7 @@ public class RootContainer extends KernelContainer {
 		 * This will sort all the {@link PortalContainerInitTaskContext} such
 		 * that we will first have all the web applications defined in the list
 		 * of dependencies of the related portal container (see
-		 * {@link PortalContainerConfig} for more details about the
+		 * {@link ApplicationContainerConfig} for more details about the
 		 * dependencies) ordered in the same order as the dependencies, then we
 		 * will have all the web applications undefined ordered by context name
 		 */
