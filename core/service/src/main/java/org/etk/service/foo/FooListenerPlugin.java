@@ -16,12 +16,31 @@
  */
 package org.etk.service.foo;
 
+import org.etk.kernel.management.ManagedPlugin;
+import org.etk.service.foo.spi.FooLifeCycleEvent;
+import org.etk.service.foo.spi.FooLifeCycleListener;
+
+
 /**
  * Created by The eXo Platform SAS
  * Author : eXoPlatform
  *          exo@exoplatform.com
  * Jul 21, 2011  
  */
-public class FooListenerPlugin {
+public abstract class FooListenerPlugin extends ManagedPlugin implements FooLifeCycleListener {
 
+  /**
+   * {@inheritDoc}
+   */
+  public abstract void fooCreated(FooLifeCycleEvent event);
+
+  /**
+   * {@inheritDoc}
+   */
+  public abstract void fooRemoved(FooLifeCycleEvent event);
+  
+  /**
+   * {@inheritDoc}
+   */
+  public abstract void fooUpdated(FooLifeCycleEvent event);
 }

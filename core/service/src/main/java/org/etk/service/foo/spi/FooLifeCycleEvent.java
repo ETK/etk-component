@@ -16,8 +16,8 @@
  */
 package org.etk.service.foo.spi;
 
+import org.etk.service.core.event.LifeCycleEvent;
 import org.etk.service.foo.model.Foo;
-import org.etk.service.kernel.LifeCycleEvent;
 
 /**
  * Created by The eXo Platform SAS
@@ -28,12 +28,42 @@ import org.etk.service.kernel.LifeCycleEvent;
 public class FooLifeCycleEvent extends LifeCycleEvent<String, Foo> {
 
   public enum Type {
-    FOO_CREATED, FOO_REMOVED
+    FOO_CREATED, FOO_REMOVED, FOO_UPDATED
   };
 
-  public FooLifeCycleEvent(String source, Foo payload) {
-    super(source, payload);
+  private Type type;
+  
+  public FooLifeCycleEvent(Foo foo, String target, Type eventType) {
+    super(target, foo);
+    this.type = eventType;
   }
+  
+  
+ public Type getType() {
+    return type;
+  }
+
+
+/**
+  *  
+  * @return
+  */
+ public Foo getFoo() {
+   return payload;
+ }
+ 
+ public String getTarget() {
+   return source;
+ }
+ 
+ /**
+  * Gets toString
+  */
+ public String toString() {
+   return source + ":" + type + "@" +payload.getName();
+ }
+ 
+ 
 
   
 

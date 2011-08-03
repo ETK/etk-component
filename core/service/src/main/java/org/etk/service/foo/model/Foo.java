@@ -24,4 +24,53 @@ package org.etk.service.foo.model;
  */
 public class Foo {
 
+  private String id;
+
+  private String name;
+
+  private Bar    bar;
+
+  public Foo() {
+
+  }
+
+  public Foo(String id) {
+    this.id = id;
+  }
+  
+  /**
+   * Constructor creates new instance with id and description.
+   * 
+   * @param id
+   * @param description
+   */
+  public Foo(String id, String name) {
+    this.id = id;
+    this.name = name;
+  }
+
+  public String getId() {
+    return id;
+  }
+
+  public void setId(String id) {
+    this.id = id;
+  }
+
+  public String getName() {
+    return name;
+  }
+
+  public void setName(String name) {
+    this.name = name;
+  }
+
+  public Bar getBar() {
+    return bar;
+  }
+
+  public void setBar(Bar bar) {
+    this.bar = bar;
+  }
+
 }

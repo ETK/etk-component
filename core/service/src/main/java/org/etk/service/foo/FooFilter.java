@@ -24,4 +24,20 @@ package org.etk.service.foo;
  */
 public class FooFilter {
 
+  /* filer by user Foo name*/
+  /** The name. */
+  private String name;
+  
+  public FooFilter() {
+    this.name = "";
+  }
+
+  public String getName() {
+    return name;
+  }
+
+  public void setName(String name) {
+    this.name = name;
+  }
+  
 }
